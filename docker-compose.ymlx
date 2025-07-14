@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  # 修正前のPostgreSQL環境
+  postgresql-before:
+    image: postgres:16-alpine
+    container_name: tax-system-postgres-before
+    environment:
+      POSTGRES_DB: tax_db_before
+      POSTGRES_USER: tax_user
+      POSTGRES_PASSWORD: tax_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_before:/var/lib/postgresql/data
+      - ./sql/schema_before.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./sql/test_data_before.sql:/docker-entrypoint-initdb.d/02-test-data.sql
+    networks:
+      - tax-network
+    command: ["postgres", "-c", "log_statement=all"]
+
+volumes:
+  postgres_data_before:
+
+networks:
+  tax-network:
+    driver: bridge
