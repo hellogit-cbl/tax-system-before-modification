@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "My Tax DB",
+      "Group": "Servers",
+      "Port": 5432,
+      "Username": "tax_user",
+      "Host": "postgresql-before",
+      "SSLMode": "prefer",
+      "MaintenanceDB": "tax_db_before"
+    }
+  }
+}

@@ -32,6 +32,8 @@ services:
       - postgresql-before
     networks:
       - tax-network
+    volumes:
+      - ./pgadmin/servers.json:/pgadmin4/servers.json
 
 volumes:
   postgres_data_before:
