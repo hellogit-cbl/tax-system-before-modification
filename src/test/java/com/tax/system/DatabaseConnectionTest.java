@@ -1,5 +1,6 @@
 package com.tax.system;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -17,12 +18,22 @@ import static org.junit.jupiter.api.Assertions.*;
 public class DatabaseConnectionTest {
 
     @Container
-    static PostgreSQLContainer<?> postgresql = new PostgreSQLContainer<>("postgres:16-alpine")
+    private static PostgreSQLContainer<?> postgresql = new PostgreSQLContainer<>("postgres:16-alpine")
             .withDatabaseName("tax_db_test")
             .withUsername("tax_user")
             .withPassword("tax_password");
 
     private Connection connection;
+
+    @org.junit.jupiter.api.BeforeAll
+    static void startContainer() {
+        postgresql.start();
+    }
+
+    @org.junit.jupiter.api.AfterAll
+    static void stopContainer() {
+        postgresql.stop();
+    }
 
     @BeforeEach
     void setUp() throws SQLException {
@@ -52,6 +63,15 @@ public class DatabaseConnectionTest {
         }
     }
 
+    // ★追加ここから
+    @AfterEach
+    void tearDown() throws SQLException {
+        if (connection != null && !connection.isClosed()) {
+            connection.close();
+        }
+    }
+    // ★追加ここまで
+
     @Test
     void testDatabaseConnection() {
         assertNotNull(connection);
@@ -73,10 +93,11 @@ public class DatabaseConnectionTest {
         }
 
         // データ確認
-        try (Statement stmt = connection.createStatement()) {
-            var rs = stmt.executeQuery("SELECT COUNT(*) FROM tax_assessment");
-            rs.next();
-            assertEquals(2, rs.getInt(1));
+        try (Statement stmt = connection.createStatement();
+             var rs = stmt.executeQuery("SELECT COUNT(*) FROM tax_assessment")) {
+            if (rs.next()) {
+                assertEquals(2, rs.getInt(1));
+            }
         }
     }
 }
