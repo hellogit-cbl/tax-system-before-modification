@@ -1,5 +1,6 @@
 package com.tax.system;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -52,6 +53,15 @@ public class DatabaseConnectionTest {
         }
     }
 
+    // ★追加ここから
+    @AfterEach
+    void tearDown() throws SQLException {
+        if (connection != null && !connection.isClosed()) {
+            connection.close();
+        }
+    }
+    // ★追加ここまで
+
     @Test
     void testDatabaseConnection() {
         assertNotNull(connection);
@@ -73,10 +83,11 @@ public class DatabaseConnectionTest {
         }
 
         // データ確認
-        try (Statement stmt = connection.createStatement()) {
-            var rs = stmt.executeQuery("SELECT COUNT(*) FROM tax_assessment");
-            rs.next();
-            assertEquals(2, rs.getInt(1));
+        try (Statement stmt = connection.createStatement();
+             var rs = stmt.executeQuery("SELECT COUNT(*) FROM tax_assessment")) {
+            if (rs.next()) {
+                assertEquals(2, rs.getInt(1));
+            }
         }
     }
 }
