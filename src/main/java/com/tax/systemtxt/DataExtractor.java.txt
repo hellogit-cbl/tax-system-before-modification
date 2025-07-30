@@ -61,11 +61,6 @@ public class DataExtractor {
 
             System.out.println("データ抽出完了: " + results.size() + "件");
 
-        } catch (org.postgresql.util.PSQLException e) {
-            System.err.println("SQLState: " + e.getSQLState());
-            System.err.println("ErrorCode: " + e.getErrorCode());
-            System.err.println("Message: " + e.getMessage());
-            throw new RuntimeException("データ抽出エラー", e);
         } catch (SQLException e) {
             throw new RuntimeException("データ抽出エラー", e);
         }

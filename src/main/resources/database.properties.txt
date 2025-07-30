@@ -1,10 +1,12 @@
-db.url=jdbc:postgresql://127.0.0.1:5432/tax_db_before
+# 修正前のデータベース設定
+db.url=jdbc:postgresql://127.0.0.1:5432/tax_db_before?charSet=UTF-8
 db.username=tax_user
 db.password=tax_password
 db.driver=org.postgresql.Driver
 db.max.connections=20
 db.connection.timeout=30000
 
+# 修正前の出力設定
 output.directory=./output
 output.file.prefix=tax_assessment_export
 output.format=CSV
