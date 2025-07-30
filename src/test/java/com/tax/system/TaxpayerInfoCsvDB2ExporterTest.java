@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
 
-public class TaxpayerInfoDB2CsvEsporterTest {
+public class TaxpayerInfoCsvDB2ExporterTest {
 
     @Container
     private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
