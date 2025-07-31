@@ -8,6 +8,8 @@ public class AllTableCsvExportMain {
         String outputDir = "./output";
 
         // try-with-resourcesでConnectionを自動クローズ
+        // POSTGRESQLのjdbcドライバを使用して接続
+        // ここではDatabaseConnectionクラスを仮定しています。実際の接
         try (java.sql.Connection conn = DatabaseConnection.getConnection()) {
             AllTableCsvExportBatch batch = new AllTableCsvExportBatch(conn);
             batch.exportAll(cityCode, outputDir);
