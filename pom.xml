@@ -104,13 +104,17 @@
                 </configuration>
             </plugin>
 
-            <!-- OpenRewrite Maven Plugin（最小限設定） -->
+            <!-- OpenRewrite Maven Plugin（city_ward_code対応版） -->
             <plugin>
                 <groupId>org.openrewrite.maven</groupId>
                 <artifactId>rewrite-maven-plugin</artifactId>
                 <version>${rewrite-maven-plugin.version}</version>
                 <configuration>
                     <exportDatatables>true</exportDatatables>
+                    <activeRecipes>
+                        <recipe>com.tax.system.CityWardCodeMigration</recipe>
+                    </activeRecipes>
+                    <configLocation>${project.basedir}/rewrite.yml</configLocation>
                 </configuration>
             </plugin>
         </plugins>

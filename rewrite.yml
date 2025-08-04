@@ -1,0 +1,26 @@
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: com.tax.system.CityWardCodeMigration
+displayName: city_ward_code移行レシピ
+description: city_codeのみの処理にcity_ward_codeを追加する
+
+recipeList:
+  # 1. SQL文の WHERE句を修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "WHERE city_code = ?"
+      replace: "WHERE city_code = ? AND city_ward_code = ?"
+      filePattern: "**/*.java"
+  
+  # 2. メソッドシグネチャを修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "exportToCsv(String cityCode, String csvFilePath)"
+      replace: "exportToCsv(String cityCode, String cityWardCode, String csvFilePath)"
+      filePattern: "**/*.java"
+  
+  # 3. PreparedStatementパラメータを追加
+  - org.openrewrite.text.FindAndReplace:
+      find: "ps.setString(1, cityCode);"
+      replace: "ps.setString(1, cityCode);\n            ps.setString(2, cityWardCode);"
+      filePattern: "**/*.java"
+
+# エラーが出るJavaクリーンアップ部分は削除
