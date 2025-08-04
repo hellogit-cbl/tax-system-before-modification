@@ -1,0 +1,24 @@
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: com.tax.system.MainCodeMigration
+displayName: メインコード修正のみ
+description: メインコードのみを修正（src/main配下）
+
+recipeList:
+  # 1. メソッドシグネチャ修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "exportToCsv(String cityCode, String csvFilePath)"
+      replace: "exportToCsv(String cityCode, String cityWardCode, String csvFilePath)"
+      filePattern: "src/main/**/*.java"
+  
+  # 2. SQL WHERE句修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "WHERE city_code = ?"
+      replace: "WHERE city_code = ? AND city_ward_code = ?"
+      filePattern: "src/main/**/*.java"
+  
+  # 3. PreparedStatement修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "ps.setString(1, cityCode);"
+      replace: "ps.setString(1, cityCode);\n            ps.setString(2, cityWardCode);"
+      filePattern: "src/main/**/*.java"

@@ -104,19 +104,110 @@
                 </configuration>
             </plugin>
 
-            <!-- OpenRewrite Maven Plugin（city_ward_code対応版） -->
+            <!-- OpenRewrite Maven Plugin（分離設定対応版） -->
             <plugin>
                 <groupId>org.openrewrite.maven</groupId>
                 <artifactId>rewrite-maven-plugin</artifactId>
                 <version>${rewrite-maven-plugin.version}</version>
                 <configuration>
                     <exportDatatables>true</exportDatatables>
+                    <!-- デフォルトは両方のレシピを実行 -->
                     <activeRecipes>
-                        <recipe>com.tax.system.CityWardCodeMigration</recipe>
+                        <recipe>com.tax.system.MainCodeMigration</recipe>
+                        <recipe>com.tax.system.TestCodeMigration</recipe>
                     </activeRecipes>
-                    <configLocation>${project.basedir}/rewrite.yml</configLocation>
+                    <!-- メインコード用設定ファイル -->
+                    <configLocation>${project.basedir}/main-code-rewrite.yml</configLocation>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- メインコードのみ修正するプロファイル -->
+        <profile>
+            <id>rewrite-main-only</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.openrewrite.maven</groupId>
+                        <artifactId>rewrite-maven-plugin</artifactId>
+                        <version>${rewrite-maven-plugin.version}</version>
+                        <configuration>
+                            <exportDatatables>true</exportDatatables>
+                            <activeRecipes>
+                                <recipe>com.tax.system.MainCodeMigration</recipe>
+                            </activeRecipes>
+                            <configLocation>${project.basedir}/main-code-rewrite.yml</configLocation>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- テストコードのみ修正するプロファイル -->
+        <profile>
+            <id>rewrite-test-only</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.openrewrite.maven</groupId>
+                        <artifactId>rewrite-maven-plugin</artifactId>
+                        <version>${rewrite-maven-plugin.version}</version>
+                        <configuration>
+                            <exportDatatables>true</exportDatatables>
+                            <activeRecipes>
+                                <recipe>com.tax.system.TestCodeMigration</recipe>
+                            </activeRecipes>
+                            <configLocation>${project.basedir}/test-code-rewrite.yml</configLocation>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- 両方を段階的に実行するプロファイル -->
+        <profile>
+            <id>rewrite-both-staged</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.openrewrite.maven</groupId>
+                        <artifactId>rewrite-maven-plugin</artifactId>
+                        <version>${rewrite-maven-plugin.version}</version>
+                        <executions>
+                            <!-- Step 1: メインコード修正 -->
+                            <execution>
+                                <id>rewrite-main-code</id>
+                                <phase>process-sources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <activeRecipes>
+                                        <recipe>com.tax.system.MainCodeMigration</recipe>
+                                    </activeRecipes>
+                                    <configLocation>${project.basedir}/main-code-rewrite.yml</configLocation>
+                                </configuration>
+                            </execution>
+                            <!-- Step 2: テストコード修正 -->
+                            <execution>
+                                <id>rewrite-test-code</id>
+                                <phase>process-test-sources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <activeRecipes>
+                                        <recipe>com.tax.system.TestCodeMigration</recipe>
+                                    </activeRecipes>
+                                    <configLocation>${project.basedir}/test-code-rewrite.yml</configLocation>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

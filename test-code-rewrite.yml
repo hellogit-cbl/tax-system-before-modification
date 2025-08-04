@@ -1,0 +1,36 @@
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: com.tax.system.TestCodeMigration
+displayName: テストコード修正のみ
+description: テストコードのみを修正（src/test配下）
+
+recipeList:
+  # 1. 最も確実なパターン：完全一致
+  - org.openrewrite.text.FindAndReplace:
+      find: 'exporter.exportToCsv("131016", CSV_PATH);'
+      replace: 'exporter.exportToCsv("131016", "151000", CSV_PATH);'
+      filePattern: "src/test/**/*.java"
+
+  # 2. より一般的なパターン
+  - org.openrewrite.text.FindAndReplace:
+      find: '.exportToCsv("131016", CSV_PATH)'
+      replace: '.exportToCsv("131016", "151000", CSV_PATH)'
+      filePattern: "src/test/**/*.java"
+
+  # 3. 具体的なCSVパス対応
+  - org.openrewrite.text.FindAndReplace:
+      find: '.exportToCsv("131016", "./test_'
+      replace: '.exportToCsv("131016", "151000", "./test_'
+      filePattern: "src/test/**/*.java"
+
+  # 4. 変数パターン対応
+  - org.openrewrite.text.FindAndReplace:
+      find: 'exportToCsv("131016", '
+      replace: 'exportToCsv("131016", "151000", '
+      filePattern: "src/test/**/*.java"
+
+  # 5. その他の都市コードパターン（必要に応じて）
+  - org.openrewrite.text.FindAndReplace:
+      find: 'exportToCsv("001", '
+      replace: 'exportToCsv("001", "A", '
+      filePattern: "src/test/**/*.java"
