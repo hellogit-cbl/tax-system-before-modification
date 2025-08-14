@@ -1,0 +1,462 @@
+type: specs.openrewrite.org/v1beta/recipe
+name: com.tax.system.GenericMainCodeMigration
+displayName: 汎用的なメインコード修正（CsvExporter特化強化版）
+description: CsvExporterクラス群のメソッドシグネチャを確実に修正する包括的レシピ
+
+recipeList:
+  # === 重複除去（最優先実行） ===
+  
+  # 1. 既存の重複cityWardCodeパラメータを除去
+  - org.openrewrite.text.FindAndReplace:
+      find: "cityWardCode, cityWardCode"
+      replace: "cityWardCode"
+      filePattern: "src/main/**/*.java"
+  
+  # 2. 4つ以上の重複除去
+  - org.openrewrite.text.FindAndReplace:
+      find: "cityWardCode, cityWardCode, cityWardCode"
+      replace: "cityWardCode"
+      filePattern: "src/main/**/*.java"
+
+  # === メソッドシグネチャ修正（段階的・確実なアプローチ） ===
+  
+  # 3. exportToCsvメソッドシグネチャ修正（基本パターン）
+  - org.openrewrite.text.FindAndReplace:
+      find: "exportToCsv\\(String cityCode, String csvFilePath\\)"
+      replace: "exportToCsv(String cityCode, String cityWardCode, String csvFilePath)"
+      regex: true
+      filePattern: "src/main/**/*.java"
+  
+  # 4. exportToCsvメソッドシグネチャ修正（throws句がある場合）
+  - org.openrewrite.text.FindAndReplace:
+      find: "exportToCsv\\(String cityCode, String csvFilePath\\) throws"
+      replace: "exportToCsv(String cityCode, String cityWardCode, String csvFilePath) throws"
+      regex: true
+      filePattern: "src/main/**/*.java"
+  
+  # 5. exportToCsvメソッドシグネチャ修正（publicアクセス修飾子付き）
+  - org.openrewrite.text.FindAndReplace:
+      find: "public void exportToCsv\\(String cityCode, String csvFilePath\\)"
+      replace: "public void exportToCsv(String cityCode, String cityWardCode, String csvFilePath)"
+      regex: true
+      filePattern: "src/main/**/*.java"
+  
+  # 6. exportToCsvメソッドシグネチャ修正（privateアクセス修飾子付き）
+  - org.openrewrite.text.FindAndReplace:
+      find: "private void exportToCsv\\(String cityCode, String csvFilePath\\)"
+      replace: "private void exportToCsv(String cityCode, String cityWardCode, String csvFilePath)"
+      regex: true
+      filePattern: "src/main/**/*.java"
+  
+  # 7. exportToCsvメソッドシグネチャ修正（protectedアクセス修飾子付き）
+  - org.openrewrite.text.FindAndReplace:
+      find: "protected void exportToCsv\\(String cityCode, String csvFilePath\\)"
+      replace: "protected void exportToCsv(String cityCode, String cityWardCode, String csvFilePath)"
+      regex: true
+      filePattern: "src/main/**/*.java"
+  
+  # 8. exportToCsvメソッドシグネチャ修正（staticメソッド）
+  - org.openrewrite.text.FindAndReplace:
+      find: "static void exportToCsv\\(String cityCode, String csvFilePath\\)"
+      replace: "static void exportToCsv(String cityCode, String cityWardCode, String csvFilePath)"
+      regex: true
+      filePattern: "src/main/**/*.java"
+  
+  # 9. exportToCsvメソッドシグネチャ修正（改行がある場合）
+  - org.openrewrite.text.FindAndReplace:
+      find: "exportToCsv\\(String cityCode,\\s*\\n\\s*String csvFilePath\\)"
+      replace: "exportToCsv(String cityCode,\n                    String cityWardCode,\n                    String csvFilePath)"
+      regex: true
+      filePattern: "src/main/**/*.java"
+  
+  # 10. exportToCsvメソッドシグネチャ修正（汎用アクセス修飾子）
+  - org.openrewrite.text.FindAndReplace:
+      find: "(public|private|protected)\\s+(static\\s+)?void exportToCsv\\(String cityCode, String csvFilePath\\)"
+      replace: "$1 $2void exportToCsv(String cityCode, String cityWardCode, String csvFilePath)"
+      regex: true
+      filePattern: "src/main/**/.java"
+
+  # === exportAll系メソッドシグネチャ修正 ===
+  
+  # 11. exportAllメソッドシグネチャ修正（基本パターン）
+  - org.openrewrite.text.FindAndReplace:
+      find: "exportAll\\(String cityCode, String ([a-zA-Z0-9_]+)\\)"
+      replace: "exportAll(String cityCode, String cityWardCode, String $1)"
+      regex: true
+      filePattern: "src/main/**/*.java"
+  
+  # 12. exportAllメソッドシグネチャ修正（throws句がある場合）
+  - org.openrewrite.text.FindAndReplace:
+      find: "exportAll\\(String cityCode, String ([a-zA-Z0-9_]+)\\) throws"
+      replace: "exportAll(String cityCode, String cityWardCode, String $1) throws"
+      regex: true
+      filePattern: "src/main/**/*.java"
+  
+  # 13. exportAllメソッドシグネチャ修正（アクセス修飾子付き）
+  - org.openrewrite.text.FindAndReplace:
+      find: "(public|private|protected)\\s+(static\\s+)?void exportAll\\(String cityCode, String ([a-zA-Z0-9_]+)\\)"
+      replace: "$1 $2void exportAll(String cityCode, String cityWardCode, String $3)"
+      regex: true
+      filePattern: "src/main/**/*.java"
+  
+  # 14. exportAllToCsvメソッドシグネチャ修正（基本パターン）
+  - org.openrewrite.text.FindAndReplace:
+      find: "exportAllToCsv\\(String cityCode, String ([a-zA-Z0-9_]+)\\)"
+      replace: "exportAllToCsv(String cityCode, String cityWardCode, String $1)"
+      regex: true
+      filePattern: "src/main/**/*.java"
+
+  # === その他のメソッドシグネチャパターン ===
+  
+  # 15. 汎用的なエクスポートメソッド修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "([a-zA-Z0-9_]+Export[a-zA-Z0-9_]*)\\(String cityCode, String ([a-zA-Z0-9_]+)\\)"
+      replace: "$1(String cityCode, String cityWardCode, String $2)"
+      regex: true
+      filePattern: "src/main/**/*.java"
+  
+  # 16. CSV関連メソッドの汎用修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "([a-zA-Z0-9_]*[Cc]sv[a-zA-Z0-9_]*)\\(String cityCode, String ([a-zA-Z0-9_]+)\\)"
+      replace: "$1(String cityCode, String cityWardCode, String $2)"
+      regex: true
+      filePattern: "src/main/**/*.java"
+
+  # === JavaDocコメント修正（メソッドシグネチャ修正後） ===
+  
+  # 17. city_codeのみのJavaDocをcity_ward_code追加版に修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "\\* @param cityCode 対象のcity_code\\s*\\n\\s*\\* @param ([a-zA-Z0-9_]+)"
+      replace: "* @param cityCode 対象のcity_code\n     * @param cityWardCode 対象のcity_ward_code\n     * @param $1"
+      regex: true
+      filePattern: "src/main/**/*.java"
+  
+  # 18. 一般的なJavaDocパターン修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "指定city_codeの各テーブルデータを一括でCSV出力します。"
+      replace: "指定city_code及びcity_ward_codeの各テーブルデータを一括でCSV出力します。"
+      filePattern: "src/main/**/*.java"
+  
+  # 19. CSVエクスポート系のコメント修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "指定されたcity_codeに基づいて([^。]+)をCSVファイルに出力"
+      replace: "指定されたcity_code及びcity_ward_codeに基づいて$1をCSVファイルに出力"
+      regex: true
+      filePattern: "src/main/**/*.java"
+
+  # === メソッド呼び出し修正（シグネチャ修正後） ===
+  
+  # 20. new演算子でのexportToCsv呼び出し修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "new ([A-Z][a-zA-Z0-9_]*CsvExporter)\\(([^)]+)\\)\\.exportToCsv\\(cityCode, ([^)]+)\\)"
+      replace: "new $1($2).exportToCsv(cityCode, cityWardCode, $3)"
+      regex: true
+      filePattern: "src/main/**/*.java"
+  
+  # 21. 一般的なexportToCsv呼び出し修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "([a-zA-Z0-9_]+)\\.exportToCsv\\(cityCode, ([^)]+)\\)"
+      replace: "$1.exportToCsv(cityCode, cityWardCode, $2)"
+      regex: true
+      filePattern: "src/main/**/*.java"
+  
+  # 22. exportAll系呼び出し修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "([a-zA-Z0-9_]*)\\.?exportAll\\(cityCode, ([^)]+)\\)"
+      replace: "$1.exportAll(cityCode, cityWardCode, $2)"
+      regex: true
+      filePattern: "src/main/**/*.java"
+
+  # === SQL関連修正 ===
+  
+  # 23. WHERE句修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "WHERE city_code = \\?"
+      replace: "WHERE city_code = ? AND city_ward_code = ?"
+      filePattern: "src/main/**/*.java"
+  
+  # 24. WHERE句修正（ANDが既にある場合）
+  - org.openrewrite.text.FindAndReplace:
+      find: "WHERE city_code = \\? AND(?! city_ward_code)"
+      replace: "WHERE city_code = ? AND city_ward_code = ? AND"
+      regex: true
+      filePattern: "src/main/**/*.java"
+
+  # === PreparedStatement修正 ===
+  
+  # 25. PreparedStatement修正（汎用変数名対応）
+  - org.openrewrite.text.FindAndReplace:
+      find: "([a-zA-Z0-9_]+)\\.setString\\(1, cityCode\\);"
+      replace: "$1.setString(1, cityCode);\n            $1.setString(2, cityWardCode);"
+      regex: true
+      filePattern: "src/main/**/*.java"
+
+  # === メイン・エントリーポイント特化修正 ===
+  
+  # 26. mainメソッド内でのcityWardCode変数宣言追加
+  - org.openrewrite.text.FindAndReplace:
+      find: "(String cityCode = \"[^\"]+\";)\\s*\\n(\\s*String [a-zA-Z0-9_]+ = [^;]+;)"
+      replace: "$1\n        String cityWardCode = \"151000\"; // 追加されたcity_ward_codeパラメータ\n$2"
+      regex: true
+      filePattern: "src/main/**/*.java"
+  
+  # 27. メソッド内でのcityWardCode変数宣言（汎用）
+  - org.openrewrite.text.FindAndReplace:
+      find: "(public [a-zA-Z0-9_<>\\[\\] ]*void [a-zA-Z0-9_]+\\([^)]*\\) [^{]*\\{[^}]*String cityCode = \"[^\"]+\";)"
+      replace: "$1\n        String cityWardCode = \"151000\"; // 追加されたcity_ward_codeパラメータ"
+      regex: true
+      filePattern: "src/main/**/*.java"
+
+  # === メソッドチェーンの修正 ===
+  
+  # 28. メソッドチェーンでの呼び出し修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "\\.exportToCsv\\(cityCode, ([^)]+)\\)"
+      replace: ".exportToCsv(cityCode, cityWardCode, $1)"
+      regex: true
+      filePattern: "src/main/**/*.java"
+  
+  # 29. this.呼び出しの修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "this\\.exportToCsv\\(cityCode, ([^)]+)\\)"
+      replace: "this.exportToCsv(cityCode, cityWardCode, $1)"
+      regex: true
+      filePattern: "src/main/**/*.java"
+  
+  # 30. super呼び出しの修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "super\\.exportToCsv\\(cityCode, ([^)]+)\\)"
+      replace: "super.exportToCsv(cityCode, cityWardCode, $1)"
+      regex: true
+      filePattern: "src/main/**/*.java"
+
+  # === 最初のクリーンアップ ===
+  
+  # 31. 重複したcityWardCodeパラメータの除去
+  - org.openrewrite.text.FindAndReplace:
+      find: "cityWardCode, cityWardCode"
+      replace: "cityWardCode"
+      filePattern: "src/main/**/*.java"
+  
+  # 32. 重複した変数宣言の除去
+  - org.openrewrite.text.FindAndReplace:
+      find: "String cityWardCode = \"151000\";\\s*\\n\\s*String cityWardCode = \"151000\";"
+      replace: "String cityWardCode = \"151000\";"
+      regex: true
+      filePattern: "src/main/**/*.java"
+  
+  # 33. 重複したsetStringの除去
+  - org.openrewrite.text.FindAndReplace:
+      find: "ps\\.setString\\(2, cityWardCode\\);\\s*\\n\\s*ps\\.setString\\(2, cityWardCode\\);"
+      replace: "ps.setString(2, cityWardCode);"
+      regex: true
+      filePattern: "src/main/**/*.java"
+
+  # === 特殊ケース対応 ===
+  
+  # 34. インターフェースメソッドのシグネチャ修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "void exportToCsv\\(String cityCode, String csvFilePath\\);"
+      replace: "void exportToCsv(String cityCode, String cityWardCode, String csvFilePath);"
+      regex: true
+      filePattern: "src/main/**/*.java"
+  
+  # 35. 抽象メソッドのシグネチャ修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "abstract void exportToCsv\\(String cityCode, String csvFilePath\\)"
+      replace: "abstract void exportToCsv(String cityCode, String cityWardCode, String csvFilePath)"
+      regex: true
+      filePattern: "src/main/**/*.java"
+
+  # === CsvExporterクラス特化修正（追加） ===
+  
+  # 36. TaxpayerInfoCsvExporter特化修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "public void exportToCsv\\(String cityCode, String csvFilePath\\)"
+      replace: "public void exportToCsv(String cityCode, String cityWardCode, String csvFilePath)"
+      regex: true
+      filePattern: "**/TaxpayerInfoCsvExporter.java"
+  
+  # 37. IndividualResidentTaxAssessmentCsvExporter特化修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "public void exportToCsv\\(String cityCode, String csvFilePath\\)"
+      replace: "public void exportToCsv(String cityCode, String cityWardCode, String csvFilePath)"
+      regex: true
+      filePattern: "**/IndividualResidentTaxAssessmentCsvExporter.java"
+  
+  # 38. IndividualResidentTaxLedgerCsvExporter特化修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "public void exportToCsv\\(String cityCode, String csvFilePath\\)"
+      replace: "public void exportToCsv(String cityCode, String cityWardCode, String csvFilePath)"
+      regex: true
+      filePattern: "**/IndividualResidentTaxLedgerCsvExporter.java"
+  
+  # 39. IndividualResidentTaxIncomeCsvExporter特化修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "public void exportToCsv\\(String cityCode, String csvFilePath\\)"
+      replace: "public void exportToCsv(String cityCode, String cityWardCode, String csvFilePath)"
+      regex: true
+      filePattern: "**/IndividualResidentTaxIncomeCsvExporter.java"
+  
+  # 40. IndividualResidentTaxDeductionCsvExporter特化修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "public void exportToCsv\\(String cityCode, String csvFilePath\\)"
+      replace: "public void exportToCsv(String cityCode, String cityWardCode, String csvFilePath)"
+      regex: true
+      filePattern: "**/IndividualResidentTaxDeductionCsvExporter.java"
+
+  # === 全CsvExporterクラス汎用修正（強化版） ===
+  
+  # 41. CsvExporterクラス全体の汎用修正（ファイル名パターン）
+  - org.openrewrite.text.FindAndReplace:
+      find: "public void exportToCsv\\(String cityCode, String csvFilePath\\)"
+      replace: "public void exportToCsv(String cityCode, String cityWardCode, String csvFilePath)"
+      regex: true
+      filePattern: "**/*CsvExporter.java"
+  
+  # 42. throws句付きのCsvExporterメソッド修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "public void exportToCsv\\(String cityCode, String csvFilePath\\) throws"
+      replace: "public void exportToCsv(String cityCode, String cityWardCode, String csvFilePath) throws"
+      regex: true
+      filePattern: "**/*CsvExporter.java"
+  
+  # 43. privateなexportToCsvメソッド修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "private void exportToCsv\\(String cityCode, String csvFilePath\\)"
+      replace: "private void exportToCsv(String cityCode, String cityWardCode, String csvFilePath)"
+      regex: true
+      filePattern: "**/*CsvExporter.java"
+  
+  # 44. protectedなexportToCsvメソッド修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "protected void exportToCsv\\(String cityCode, String csvFilePath\\)"
+      replace: "protected void exportToCsv(String cityCode, String cityWardCode, String csvFilePath)"
+      regex: true
+      filePattern: "**/*CsvExporter.java"
+
+  # === インターフェース・抽象クラス対応 ===
+  
+  # 45. インターフェースメソッドのシグネチャ修正（CsvExporter特化）
+  - org.openrewrite.text.FindAndReplace:
+      find: "void exportToCsv\\(String cityCode, String csvFilePath\\);"
+      replace: "void exportToCsv(String cityCode, String cityWardCode, String csvFilePath);"
+      regex: true
+      filePattern: "**/*CsvExporter*.java"
+  
+  # 46. 抽象メソッドのシグネチャ修正（CsvExporter特化）
+  - org.openrewrite.text.FindAndReplace:
+      find: "abstract void exportToCsv\\(String cityCode, String csvFilePath\\)"
+      replace: "abstract void exportToCsv(String cityCode, String cityWardCode, String csvFilePath)"
+      regex: true
+      filePattern: "**/*CsvExporter*.java"
+
+  # === 継承・実装クラス対応 ===
+  
+  # 47. @Overrideアノテーション付きメソッド修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "@Override\\s*\\n\\s*public void exportToCsv\\(String cityCode, String csvFilePath\\)"
+      replace: "@Override\n    public void exportToCsv(String cityCode, String cityWardCode, String csvFilePath)"
+      regex: true
+      filePattern: "**/*CsvExporter*.java"
+
+  # === CsvExporter関連のJavaDoc修正 ===
+  
+  # 48. CsvExporter専用JavaDoc修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "\\* CSVファイルにエクスポートします。\\s*\\n\\s*\\* @param cityCode city_code\\s*\\n\\s*\\* @param csvFilePath"
+      replace: "* CSVファイルにエクスポートします。\n     * @param cityCode city_code\n     * @param cityWardCode city_ward_code\n     * @param csvFilePath"
+      regex: true
+      filePattern: "**/*CsvExporter*.java"
+  
+  # 49. 税務システム専用コメント修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "指定されたcity_codeの税務データをCSV形式で出力"
+      replace: "指定されたcity_code及びcity_ward_codeの税務データをCSV形式で出力"
+      filePattern: "**/*CsvExporter*.java"
+
+  # === ログ出力の修正 ===
+  
+  # 50. ログメッセージの修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "city_code: \\{\\}"
+      replace: "city_code: {}, city_ward_code: {}"
+      filePattern: "src/main/**/*.java"
+  
+  # 51. ログパラメータの修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "log\\.(info|debug|warn|error)\\(\"([^\"]*city_code: \\{\\}, city_ward_code: \\{\\}[^\"]*)\", cityCode\\)"
+      replace: "log.$1(\"$2\", cityCode, cityWardCode)"
+      regex: true
+      filePattern: "src/main/**/*.java"
+
+  # === エラーハンドリング修正 ===
+  
+  # 52. 例外メッセージの修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "city_code=' \\+ cityCode"
+      replace: "city_code=' + cityCode + ', city_ward_code=' + cityWardCode"
+      filePattern: "src/main/**/*.java"
+
+  # === バッチ・ユーティリティクラス特化 ===
+  
+  # 53. バッチクラスのrunメソッド修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "public void run\\(\\) \\{([^}]*String cityCode = \"[^\"]+\";)"
+      replace: "public void run() {$1\n        String cityWardCode = \"151000\"; // 追加されたcity_ward_codeパラメータ"
+      regex: true
+      filePattern: "src/main/**/*Batch.java"
+  
+  # 54. executeメソッド内の変数宣言
+  - org.openrewrite.text.FindAndReplace:
+      find: "public [a-zA-Z0-9_<>\\[\\] ]*execute\\([^)]*\\) \\{([^}]*String cityCode = \"[^\"]+\";)"
+      replace: "public void execute() {$1\n        String cityWardCode = \"151000\"; // 追加されたcity_ward_codeパラメータ"
+      regex: true
+      filePattern: "src/main/**/*.java"
+
+  # === Lambda・関数型インターフェース対応 ===
+  
+  # 55. Lambda式内での変数宣言
+  - org.openrewrite.text.FindAndReplace:
+      find: "\\(\\) -> \\{([^}]*String cityCode = \"[^\"]+\";)"
+      replace: "() -> {$1\n            String cityWardCode = \"151000\"; // 追加されたcity_ward_codeパラメータ"
+      regex: true
+      filePattern: "src/main/**/*.java"
+
+  # === 静的メソッド呼び出し修正 ===
+  
+  # 56. 静的メソッド呼び出し修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "([A-Z][a-zA-Z0-9_]*)\\.exportToCsv\\(cityCode, ([^)]+)\\)"
+      replace: "$1.exportToCsv(cityCode, cityWardCode, $2)"
+      regex: true
+      filePattern: "src/main/**/*.java"
+
+  # === 最終クリーンアップ（重複除去の最終段階） ===
+  
+  # 57. 4つのパラメータを3つに修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "exportToCsv\\(cityCode, cityWardCode, cityWardCode, ([^)]+)\\)"
+      replace: "exportToCsv(cityCode, cityWardCode, $1)"
+      regex: true
+      filePattern: "src/main/**/*.java"
+  
+  # 58. 5つのパラメータを3つに修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "exportToCsv\\(cityCode, cityWardCode, cityWardCode, cityWardCode, ([^)]+)\\)"
+      replace: "exportToCsv(cityCode, cityWardCode, $1)"
+      regex: true
+      filePattern: "src/main/**/*.java"
+  
+  # 59. exportAll系の重複修正
+  - org.openrewrite.text.FindAndReplace:
+      find: "exportAll\\(cityCode, cityWardCode, cityWardCode, ([^)]+)\\)"
+      replace: "exportAll(cityCode, cityWardCode, $1)"
+      regex: true
+      filePattern: "src/main/**/*.java"
+  
+  # 60. 最終的な重複したcityWardCode除去
+  - org.openrewrite.text.FindAndReplace:
+      find: "cityWardCode, cityWardCode"
+      replace: "cityWardCode"
+      filePattern: "src/main/**/*.java"

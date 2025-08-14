@@ -1,0 +1,44 @@
+type: specs.openrewrite.org/v1beta/recipe
+name: com.tax.system.AddCityWardCodeToTestMethods
+displayName: Add cityWardCode parameter to test method calls
+description: Add cityWardCode parameter to exportToCsv method calls in test files
+
+recipeList:
+  # 1. 完全一致パターン - より具体的な置換
+  - org.openrewrite.text.FindAndReplace:
+      find: 'exporter.exportToCsv("131016", CSV_PATH);'
+      replace: 'exporter.exportToCsv("131016", "151000", CSV_PATH);'
+      filePattern: '**/*Test.java'
+  
+  # 2. 一般的なパターン1 - 2パラメータから3パラメータへ
+  - org.openrewrite.text.FindAndReplace:
+      find: 'exportToCsv("131016", CSV_PATH)'
+      replace: 'exportToCsv("131016", "151000", CSV_PATH)'
+      filePattern: '**/*Test.java'
+  
+  # 3. 変数を使用したパターン
+  - org.openrewrite.text.FindAndReplace:
+      find: 'exportToCsv(cityCode, CSV_PATH)'
+      replace: 'exportToCsv(cityCode, "151000", CSV_PATH)'
+      filePattern: '**/*Test.java'
+  
+  # 4. より一般的なパターン（任意の文字列リテラル + CSV_PATH）
+  - org.openrewrite.text.FindAndReplace:
+      find: 'exportToCsv("([^"]+)", CSV_PATH)'
+      replace: 'exportToCsv("$1", "151000", CSV_PATH)'
+      filePattern: '**/*Test.java'
+      regex: true
+  
+  # 5. セミコロンなしのパターン
+  - org.openrewrite.text.FindAndReplace:
+      find: 'exportToCsv("([^"]+)", ([A-Z_]+))'
+      replace: 'exportToCsv("$1", "151000", $2)'
+      filePattern: '**/*Test.java'
+      regex: true
+  
+  # 6. メソッドチェーンや複数行にわたるパターン
+  - org.openrewrite.text.FindAndReplace:
+      find: '\.exportToCsv\("([^"]+)",\s*CSV_PATH\)'
+      replace: '.exportToCsv("$1", "151000", CSV_PATH)'
+      filePattern: '**/*Test.java'
+      regex: true
