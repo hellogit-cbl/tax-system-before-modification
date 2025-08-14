@@ -4,12 +4,18 @@ public class AllTableCsvExportMain {
     public static void main(String[] args) {
         System.out.println("=== 全テーブルCSVエクスポートバッチ処理開始 ===");
 
-        String cityCode = "131016"; // 対象のcity_code
-        String outputDir = "./output";
+        // パラメータファイルからcityCodeとoutputDirを取得
+        java.util.Properties params = new java.util.Properties();
+        try (java.io.FileReader reader = new java.io.FileReader("src/main/resources/export_params.txt")) {
+            params.load(reader);
+        } catch (Exception e) {
+            System.err.println("パラメータファイル読み込みエラー: " + e.getMessage());
+            return;
+        }
+        String cityCode = params.getProperty("city_code", "131016");
+        String outputDir = params.getProperty("output_dir", "./output");
 
         // try-with-resourcesでConnectionを自動クローズ
-        // POSTGRESQLのjdbcドライバを使用して接続
-        // ここではDatabaseConnectionクラスを仮定しています。実際の接
         try (java.sql.Connection conn = DatabaseConnection.getConnection()) {
             AllTableCsvExportBatch batch = new AllTableCsvExportBatch(conn);
             batch.exportAll(cityCode, outputDir);

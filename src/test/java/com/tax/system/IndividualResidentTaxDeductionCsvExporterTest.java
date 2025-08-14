@@ -46,10 +46,17 @@ public class IndividualResidentTaxDeductionCsvExporterTest {
 
     @Test
     void testExportToCsv() throws Exception {
+        // パラメータファイルからcity_codeを取得
+        java.util.Properties params = new java.util.Properties();
+        try (java.io.FileReader reader = new java.io.FileReader("src/test/java/com/tax/system/params_deduction.txt")) {
+            params.load(reader);
+        }
+        String cityCode = params.getProperty("city_code");
+        String csvPath = params.getProperty("csv_path");
         IndividualResidentTaxDeductionCsvExporter exporter = new IndividualResidentTaxDeductionCsvExporter(connection);
-        exporter.exportToCsv("131016", CSV_PATH);
-        assertTrue(new File(CSV_PATH).exists());
-        String content = Files.readString(new File(CSV_PATH).toPath());
+        exporter.exportToCsv(cityCode, csvPath);
+        assertTrue(new File(csvPath).exists());
+        String content = Files.readString(new File(csvPath).toPath());
         assertTrue(content.contains("city_code"));
         assertTrue(content.contains("A00001"));
     }
