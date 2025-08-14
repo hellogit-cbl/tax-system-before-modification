@@ -111,10 +111,10 @@
                 <version>${rewrite-maven-plugin.version}</version>
                 <configuration>
                     <exportDatatables>true</exportDatatables>
-                    <!-- デフォルトは両方のレシピを実行 -->
+                    <!-- デフォルトは両方のレシピを実行（汎用レシピ名に修正） -->
                     <activeRecipes>
-                        <recipe>com.tax.system.MainCodeMigration</recipe>
-                        <recipe>com.tax.system.TestCodeMigration</recipe>
+                        <recipe>com.tax.system.GenericMainCodeMigration</recipe>
+                        <recipe>com.tax.system.GenericTestCodeMigration</recipe>
                     </activeRecipes>
                     <!-- メインコード用設定ファイル -->
                     <configLocation>${project.basedir}/main-code-rewrite.yml</configLocation>
@@ -136,7 +136,8 @@
                         <configuration>
                             <exportDatatables>true</exportDatatables>
                             <activeRecipes>
-                                <recipe>com.tax.system.MainCodeMigration</recipe>
+                                <!-- 汎用レシピ名に修正 -->
+                                <recipe>com.tax.system.GenericMainCodeMigration</recipe>
                             </activeRecipes>
                             <configLocation>${project.basedir}/main-code-rewrite.yml</configLocation>
                         </configuration>
@@ -157,7 +158,8 @@
                         <configuration>
                             <exportDatatables>true</exportDatatables>
                             <activeRecipes>
-                                <recipe>com.tax.system.TestCodeMigration</recipe>
+                                <!-- 汎用レシピ名に修正 -->
+                                <recipe>com.tax.system.GenericTestCodeMigration</recipe>
                             </activeRecipes>
                             <configLocation>${project.basedir}/test-code-rewrite.yml</configLocation>
                         </configuration>
@@ -185,7 +187,8 @@
                                 </goals>
                                 <configuration>
                                     <activeRecipes>
-                                        <recipe>com.tax.system.MainCodeMigration</recipe>
+                                        <!-- 汎用レシピ名に修正 -->
+                                        <recipe>com.tax.system.GenericMainCodeMigration</recipe>
                                     </activeRecipes>
                                     <configLocation>${project.basedir}/main-code-rewrite.yml</configLocation>
                                 </configuration>
@@ -199,7 +202,8 @@
                                 </goals>
                                 <configuration>
                                     <activeRecipes>
-                                        <recipe>com.tax.system.TestCodeMigration</recipe>
+                                        <!-- 汎用レシピ名に修正 -->
+                                        <recipe>com.tax.system.GenericTestCodeMigration</recipe>
                                     </activeRecipes>
                                     <configLocation>${project.basedir}/test-code-rewrite.yml</configLocation>
                                 </configuration>
